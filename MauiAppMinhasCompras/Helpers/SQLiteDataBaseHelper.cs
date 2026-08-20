@@ -6,6 +6,8 @@ namespace MauiAppMinhasCompras.Helpers
     public class SQLiteDataBaseHelper
     {
         readonly SQLiteAsyncConnection _conn;
+
+        // A classe a seguir realiza todo o controle do CRUD (Create, Read, Update e Delete) do banco de dados SQLite. Ela é responsável por criar a tabela Produto, inserir novos produtos, atualizar produtos existentes, deletar produtos e buscar produtos no banco de dados.
         public SQLiteDataBaseHelper(string path)
         {
             _conn = new SQLiteAsyncConnection(path);

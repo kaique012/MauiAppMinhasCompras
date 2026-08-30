@@ -62,16 +62,44 @@ public partial class ListaProduto : ContentPage
 
 	private async void MenuItem_Clicked(object sender, EventArgs e)
     {
-		// "sender é o próprio MenuItem que foi clicado
-		var menuItem = (MenuItem)sender;
+		try
+		{
+			// "sender é o próprio MenuItem que foi clicado
+			var menuItem = (MenuItem)sender;
 
-		// Aqui estou pegando o produto que foi selecionado na lista de produtos
-		var produtoSelecionado = (Produto)menuItem.CommandParameter;
+			// Aqui estou pegando o produto que foi selecionado na lista de produtos
+			var produtoSelecionado = (Produto)menuItem.CommandParameter;
 
-        // Aqui estou chamando o método Delete() que está no meu banco de dados, que vai deletar o produto selecionado)
-        await App.Db.Delete(produtoSelecionado);
+			bool confirm = await DisplayAlert ("Tem Certeza?", "Remover Produto?", "SIM", "NÃO");
 
-        // Aqui estou removendo o produto selecionado da minha ObservableCollection, para que a minha list view seja atualizada automaticamente
-        lista.Remove(produtoSelecionado); 
+		// Aqui estou chamando o método Delete() que está no meu banco de dados, que vai deletar o produto selecionado)
+		if(confirm)
+			{
+				await App.Db.Delete(produtoSelecionado);
+                lista.Remove(produtoSelecionado); // Aqui estou removendo o produto selecionado da minha ObservableCollection, para que a minha list view seja atualizada automaticamente
+            }
+		}
+		catch (Exception ex) 
+		{
+			DisplayAlert("Ops", ex.Message, "OK");
+		}
+	}
+
+	private void lst_produtos_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+	{
+		try
+		{
+			Produto p = e.SelectedItem as Produto;
+
+			Navigation.PushAsync(new Views.EditarProduto
+			{
+				BindingContext = p,
+			});    
+		}
+        catch (Exception ex)
+        {
+            DisplayAlert("Ops", ex.Message, "OK");
+        }
+
     }
 }

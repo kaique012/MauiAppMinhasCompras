@@ -22,6 +22,7 @@ public partial class NovoProduto : ContentPage
 
 			await App.Db.Insert(p); // Todo metodo "await" tem que ser async
 			await DisplayAlertAsync("Sucesso!", "Registro Inserido", "OK");
+			await Navigation.PopAsync(); // Volta para a tela anterior
         }
 		catch (Exception ex)
 		{

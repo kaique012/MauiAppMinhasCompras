@@ -1,6 +1,5 @@
 using MauiAppMinhasCompras.Models;
 using System.Collections.ObjectModel;
-using System.Security.Cryptography.X509Certificates;
 
 namespace MauiAppMinhasCompras.Views;
 
@@ -15,18 +14,24 @@ public partial class ListaProduto : ContentPage
 		lst_produtos.ItemsSource = lista; // Aqui estou dizendo que a minha lista de produtos vai ser a minha ObservableCollection
 	}
 
-    protected override async void OnAppearing() // Esse método é chamado quando a tela é exibida, ou seja, quando o usuário entra na tela de lista de produtos
-    {
-        lista.Clear(); // limpa antes de recarregar, evitando duplicar
-        List<Produto> tmp = await App.Db.GetAll();
-        tmp.ForEach(i => lista.Add(i));
-    }
-
+	protected override async void OnAppearing()
+	{
+		try
+		{
+			lista.Clear();
+			List<Produto> tmp = await App.Db.GetAll();
+			tmp.ForEach(i => lista.Add(i));
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Erro ao carregar produtos: {ex.Message}");
+		}
+	}
 	private void ToolbarItem_Clicked(object sender, EventArgs e)
 	{
 		try
 		{
-			Navigation.PushAsync(new Views.NovoProduto()); 
+			Navigation.PushAsync(new Views.NovoProduto());
 			//Quando realiza o evento "clicked" em ListaProduto.Xaml ele muda de tela para adicionar novos produtos
 		}
 		catch (Exception ex)
@@ -35,33 +40,38 @@ public partial class ListaProduto : ContentPage
 		}
 	}
 
-    private async void txt_search_TextChanged(object sender, TextChangedEventArgs e)
-    {
+	private async void txt_search_TextChanged(object sender, TextChangedEventArgs e)
+	{
 		string q = e.NewTextValue;
 
-		lista.Clear(); // Limpa a lista de produtos para que não fique duplicado quando o usuário digitar algo na caixa de pesquisa
+		lst_produtos.IsRefreshing = true;	
+
+        lista.Clear(); // Limpa a lista de produtos para que não fique duplicado quando o usuário digitar algo na caixa de pesquisa
 		try
 		{
 			List<Produto> tmp = await App.Db.Search(q);
-            tmp.ForEach(i => lista.Add(i));
-        }
+			tmp.ForEach(i => lista.Add(i));
+		}
 		catch (Exception ex)
 		{
 			DisplayAlert("Ops", ex.Message, "Ok");
 		}
+		finally
+		{
+			lst_produtos.IsRefreshing = false; // Aqui estou dizendo que a minha list view não está mais sendo atualizada, para que o usuário possa voltar a interagir com a lista de produtos
+		}
 	}
-
 	private void ToolbarItem_Clicked_1(object sender, EventArgs e)
 	{
 		double soma = lista.Sum(i => i.Total);
 
-        string msg = $"O total é {soma:C}";
+		string msg = $"O total é {soma:C}";
 
 		DisplayAlert("Total dos produtos", msg, "OK");
 	}
 
 	private async void MenuItem_Clicked(object sender, EventArgs e)
-    {
+	{
 		try
 		{
 			// "sender é o próprio MenuItem que foi clicado
@@ -70,16 +80,16 @@ public partial class ListaProduto : ContentPage
 			// Aqui estou pegando o produto que foi selecionado na lista de produtos
 			var produtoSelecionado = (Produto)menuItem.CommandParameter;
 
-			bool confirm = await DisplayAlert ("Tem Certeza?", "Remover Produto?", "SIM", "NÃO");
+			bool confirm = await DisplayAlert("Tem Certeza?", "Remover Produto?", "SIM", "NÃO");
 
-		// Aqui estou chamando o método Delete() que está no meu banco de dados, que vai deletar o produto selecionado)
-		if(confirm)
+			// Aqui estou chamando o método Delete() que está no meu banco de dados, que vai deletar o produto selecionado)
+			if (confirm)
 			{
 				await App.Db.Delete(produtoSelecionado);
-                lista.Remove(produtoSelecionado); // Aqui estou removendo o produto selecionado da minha ObservableCollection, para que a minha list view seja atualizada automaticamente
-            }
+				lista.Remove(produtoSelecionado); // Aqui estou removendo o produto selecionado da minha ObservableCollection, para que a minha list view seja atualizada automaticamente
+			}
 		}
-		catch (Exception ex) 
+		catch (Exception ex)
 		{
 			DisplayAlert("Ops", ex.Message, "OK");
 		}
@@ -94,12 +104,30 @@ public partial class ListaProduto : ContentPage
 			Navigation.PushAsync(new Views.EditarProduto
 			{
 				BindingContext = p,
-			});    
+			});
 		}
-        catch (Exception ex)
-        {
-            DisplayAlert("Ops", ex.Message, "OK");
-        }
+		catch (Exception ex)
+		{
+			DisplayAlert("Ops", ex.Message, "OK");
+		}
 
-    }
+	}
+
+	private async void lst_produtos_Refreshing(object sender, EventArgs e)
+	{
+		try
+		{
+			lista.Clear();
+			List<Produto> tmp = await App.Db.GetAll();
+			tmp.ForEach(i => lista.Add(i));
+		}
+		catch (Exception ex)
+		{
+			await DisplayAlert("Ops", ex.Message, "OK");
+		}
+		finally
+		{
+			lst_produtos.IsRefreshing = false; // Aqui estou dizendo que a minha list view não está mais sendo atualizada, para que o usuário possa voltar a interagir com a lista de produtos
+		}
+	}
 }

@@ -42,9 +42,9 @@ namespace MauiAppMinhasCompras.Models
             get => _preco;
             set 
             { 
-                if (value == null)
+                if (value == null) // Impedir que adicionem algo em branco para a lista
                 {
-                    throw new Exception("Por favor, preencha o preço"); // Impedir que adicionem algo em branco para a lista
+                    throw new Exception("Por favor, preencha o preço");
                 }
 
                 _preco = value;

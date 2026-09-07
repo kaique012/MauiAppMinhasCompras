@@ -31,7 +31,7 @@
                   ItemSelected="lst_produtos_ItemSelected">
             <ListView.Header>
                     <Grid ColumnDefinitions="*, *, *, *, *"
-                      BackgroundColor="{StaticResource Gray400}">
+                      BackgroundColor="{StaticResource Gray400}"> <!--Cor de Fundo-->
                         <!--Cria colunas-->
                         <Label Grid.Column="0" Text="ID" FontAttributes="Bold" />
                     <Label Grid.Column="1" Text="Descrição" FontAttributes="Bold" />

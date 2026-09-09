@@ -51,6 +51,19 @@ namespace MauiAppMinhasCompras.Models
             }
 
         }
+        private string _categoria;
+        public string Categoria
+        {
+            get => _categoria;
+            set
+            {
+                // Mesma lógica de proteção que você já usa no Preco
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new Exception("Por favor, selecione uma categoria");
+
+                _categoria = value;
+            }
+        }
         public double Total {get => Quantidade * Preco;}
     }
 }
